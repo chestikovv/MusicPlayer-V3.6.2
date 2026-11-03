@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Chestikovv Music Player</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="shortcut icon" href="assets/icons/meicon.png" type="image/x-icon">
+</head>
+</head>
+<body>
+
+<div id="custom-bg" class="app-bg-layer"></div>
+<div class="app-container">
+
+    <aside class="sidebar">
+        <div class="sidebar-toggle" onclick="toggleSidebar()">
+            <svg viewBox="0 0 24 24">
+                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+            </svg>
+        </div>
+
+        <div class="logo">
+            <img class="logo-img" src="assets/icons/meicon.png" alt="">
+            <div class="logo-text">
+                <h1>Chestikovv</h1>
+                <h3><span>MusicPlayer</span></h3>
+            </div>
+        </div>
+
+        <div class="section-header">Альбомы</div>
+        <div id="albums-list" class="scrollable" style="flex: 0 0 40%; max-height: 40%; margin-bottom: 20px;"></div>
+
+        <div class="section-header">Плейлисты</div>
+        <div id="playlist-list" class="scrollable"></div>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-footer-expanded">
+                <div class="sidebar-playlist-btn">
+                    <button class="btn-outline" onclick="openCreatePlaylistModal()" title="Создать плейлист">
+                        <svg class="icon-svg" viewBox="0 0 24 24" width="22" height="22">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                    <button class="btn-outline" onclick="openDeleteConfirmModal()" title="Удалить плейлист">
+                        <svg class="icon-svg" viewBox="0 0 24 24" width="22" height="22">
+                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                </div>
+                <button class="btn-outline" onclick="openSettingsModal()" title="Настройки">
+                    <svg class="icon-svg" viewBox="0 0 24 24" width="22" height="22">
+                        <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.33-.02-.64-.06-.94l2.02-1.58c.18-.14.23-.38.12-.56l-1.89-3.28c-.12-.19-.36-.26-.56-.18l-2.38.96c-.5-.38-1.06-.68-1.66-.88L14.45 3.5c-.04-.2-.2-.34-.4-.34h-3.78c-.2 0-.36.14-.4.34l-.3 2.52c-.6.2-1.16.5-1.66.88l-2.38-.96c-.2-.08-.44-.01-.56.18l-1.89 3.28c-.12.19-.07.42.12.56l2.02 1.58c-.04.3-.06.61-.06.94 0 .33.02.64.06.94l-2.02 1.58c-.18.14-.23.38-.12.56l1.89 3.28c.12.19.36.26.56.18l2.38-.96c.5.38 1.06.68 1.66.88l.3 2.52c.04.2.2.34.4.34h3.78c.2 0 .36-.14.4-.34l.3-2.52c.6-.2 1.16-.5 1.66-.88l2.38.96c.2.08.44.01.56-.18l1.89-3.28c.12-.19.07-.42-.12-.56l-2.02-1.58zM12 15c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z" fill="currentColor"/>
+                    </svg>
+                </button>
+                <button class="btn-outline btn-add-files" onclick="document.getElementById('audio-input').click()" title="Добавить музыку">
+                    <svg class="icon-svg" viewBox="0 0 24 24" width="22" height="22">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" fill="currentColor"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="sidebar-footer-collapsed">
+                <button class="btn-outline btn-more-actions" onclick="openMoreActionsModal()" title="Ещё действия">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <circle cx="12" cy="6" r="2" fill="currentColor"/>
+                        <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                        <circle cx="12" cy="18" r="2" fill="currentColor"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <main class="player-center">
+        <div class="player-ui">
+            <div class="cover-box">
+                <img src="assets/icons/me-question.png" id="main-cover">
+                <div class="cover-overlay" onclick="document.getElementById('cover-input').click()">
+                    <span>СМЕНИТЬ ОБЛОЖКУ</span>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="track-info">
+                    <h1 id="current-track-title">Выберите трек</h1>
+                    <div id="current-artist" class="artist-name" onclick="filterByArtist()">Неизвестно</div>
+                    <p id="current-playlist-name">Плейлист: Все треки</p>
+
+                    <div id="ab-loop-indicator" class="ab-loop-indicator" style="display: none;">
+                        <span>A-B loop активен</span>
+                    </div>
+
+                    <div id="sleep-timer-indicator" class="sleep-timer-indicator" style="display: none;">
+                        <span>Сон через: <span id="sleep-timer-time">00:00</span></span>
+                        <button class="timer-cancel" onclick="cancelSleepTimer()">✕</button>
+                    </div>
+                </div>
+
+                <div class="controls-group">
+                    <div class="progress-bar-container">
+                        <span id="time-current">0:00</span>
+                        <input type="range" id="progress-slider" value="0" min="0" max="100">
+                        <span id="time-total">0:00</span>
+                    </div>
+
+                    <div class="ab-markers">
+                        <span id="ab-a-marker" style="display: none;">A: <span id="ab-a-time">0:00</span></span>
+                        <span id="ab-b-marker" style="display: none;">B: <span id="ab-b-time">0:00</span></span>
+                    </div>
+
+                    <div class="playback-btns">
+                        <button onclick="openMoveModal()" class="btn-add-to-playlist" title="Добавить в плейлист">
+                            <svg viewBox="0 0 24 24" width="24" height="24">
+                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/>
+                            </svg>
+                        </button>
+
+                        <button onclick="toggleShuffle()" class="btn-icon" id="shuffle-btn">
+                            <svg viewBox="0 0 24 24" width="24" height="24">
+                                <path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.45 20 9.5V4h-5.5zm.59 10.83l-1.41 1.41 3.17 3.17L14.5 22H20v-5.5l-2.04 2.04-2.87-2.87z" fill="currentColor"/>
+                            </svg>
+                        </button>
+
+                        <button onclick="prevTrack()" class="btn-icon">
+                            <svg viewBox="0 0 24 24" width="32" height="32">
+                                <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" fill="currentColor"/>
+                            </svg>
+                        </button>
+
+                        <button onclick="togglePlay()" class="btn-play-pause" id="play-pause-btn">
+                            <svg id="svg-play" viewBox="0 0 24 24" width="32" height="32">
+                                <path d="M8 5v14l11-7z" fill="white"/>
+                            </svg>
+                            <svg id="svg-pause" viewBox="0 0 24 24" width="32" height="32" style="display:none;">
+                                <path d="M6 19h4V5H6zm8-14v14h4V5z" fill="white"/>
+                            </svg>
+                            <div class="equalizer" id="equalizer" style="display: none;">
+                                <span></span><span></span><span></span><span></span><span></span>
+                            </div>
+                        </button>
+
+                        <button onclick="nextTrack()" class="btn-icon">
+                            <svg viewBox="0 0 24 24" width="32" height="32" style="transform: rotate(180deg);">
+                                <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" fill="currentColor"/>
+                            </svg>
+                        </button>
+
+                        <button onclick="toggleRepeat()" class="btn-icon" id="repeat-btn">
+                            <svg viewBox="0 0 24 24" width="28" height="28">
+                                <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z" fill="currentColor"/>
+                            </svg>
+                        </button>
+
+                        <div style="position: relative;">
+                            <button onclick="toggleMenu()" class="btn-menu" id="menu-btn">
+                                <svg viewBox="0 0 24 24" width="24" height="24">
+                                    <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" fill="currentColor"/>
+                                </svg>
+                            </button>
+
+                            <div class="dropdown-menu" id="dropdown-menu">
+                                <div class="dropdown-item" onclick="toggleABLoop()" id="ab-loop-menu-item">
+                                    <svg viewBox="0 0 24 24" width="18" height="18">
+                                        <text x="4" y="18" font-size="14" fill="currentColor" font-weight="bold">A-B</text>
+                                    </svg>
+                                    <span>A-B loop</span>
+                                </div>
+                                <div class="dropdown-item" onclick="openSleepTimerModal()" id="sleep-timer-menu-item">
+                                    <svg viewBox="0 0 24 24" width="18" height="18">
+                                        <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8zm.5-13H11v6l5.2 3.1.8-1.2-4.5-2.7V7z" fill="currentColor"/>
+                                    </svg>
+                                    <span>Таймер сна</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="volume-box">
+                        <svg width="20" height="20" viewBox="0 0 24 24" style="opacity:0.5">
+                            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" fill="currentColor"/>
+                        </svg>
+                        <input type="range" id="volume-slider" value="70" min="0" max="100">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <section class="tracks-panel" id="drop-zone">
+        <div class="sidebar-toggle" style="left: -14px; right: auto;" onclick="toggleTracksPanel()">
+            <svg viewBox="0 0 24 24">
+                <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+            </svg>
+        </div>
+
+        <div class="section-header"><p>Треки</p></div>
+        <div class="search-box">
+            <input type="text" id="search-input" placeholder="Поиск трека..." oninput="handleSearch(this.value)">
+            <button id="search-clear-btn" class="search-clear-btn" style="display: none;" onclick="clearSearch()">
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/>
+                </svg>
+            </button>
+        </div>
+        <div id="songs-container" class="scrollable"></div>
+    </section>
+</div>
+
+<div id="more-actions-modal" class="modal-overlay">
+    <div class="modal-content more-actions-content">
+        <button class="modal-close-btn" onclick="closeMoreActionsModal()">
+            <svg viewBox="0 0 24 24" width="20" height="20">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/>
+            </svg>
+        </button>
+        <h3>Действия</h3>
+        <div class="more-actions-grid">
+            <button class="more-action-btn" onclick="document.getElementById('audio-input').click(); closeMoreActionsModal()">
+                <svg class="icon-svg" viewBox="0 0 24 24" width="32" height="32">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" fill="currentColor"/>
+                </svg>
+                <span>Добавить музыку</span>
+            </button>
+            <button class="more-action-btn" onclick="openCreatePlaylistModal(); closeMoreActionsModal()">
+                <svg class="icon-svg" viewBox="0 0 24 24" width="32" height="32">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/>
+                </svg>
+                <span>Создать плейлист</span>
+            </button>
+            <button class="more-action-btn" onclick="openDeleteConfirmModal(); closeMoreActionsModal()">
+                <svg class="icon-svg" viewBox="0 0 24 24" width="32" height="32">
+                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="currentColor"/>
+                </svg>
+                <span>Удалить плейлист</span>
+            </button>
+            <button class="more-action-btn" onclick="openSettingsModal(); closeMoreActionsModal()">
+                <svg class="icon-svg" viewBox="0 0 24 24" width="32" height="32">
+                    <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.33-.02-.64-.06-.94l2.02-1.58c.18-.14.23-.38.12-.56l-1.89-3.28c-.12-.19-.36-.26-.56-.18l-2.38.96c-.5-.38-1.06-.68-1.66-.88L14.45 3.5c-.04-.2-.2-.34-.4-.34h-3.78c-.2 0-.36.14-.4.34l-.3 2.52c-.6.2-1.16.5-1.66.88l-2.38-.96c-.2-.08-.44-.01-.56.18l-1.89 3.28c-.12.19-.07.42.12.56l2.02 1.58c-.04.3-.06.61-.06.94 0 .33.02.64.06.94l-2.02 1.58c-.18.14-.23.38-.12.56l1.89 3.28c.12.19.36.26.56.18l2.38-.96c.5.38 1.06.68 1.66.88l.3 2.52c.04.2.2.34.4.34h3.78c.2 0 .36-.14.4-.34l.3-2.52c.6-.2 1.16-.5 1.66-.88l2.38.96c.2.08.44.01.56-.18l1.89-3.28c.12-.19.07-.42-.12-.56l-2.02-1.58zM12 15c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z" fill="currentColor"/>
+                </svg>
+                <span>Настройки</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="settings-modal" class="modal-overlay">
+    <div class="modal-content settings-modal-content">
+        <button class="modal-close-btn" onclick="closeSettingsModal()">
+            <svg viewBox="0 0 24 24" width="20" height="20">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/>
+            </svg>
+        </button>
+        <div class="settings-header">
+            <h3>Настройки</h3>
+            <p class="version-settings">
+                Версия 3.6.0
+                <span><button class="check-update-btn" onclick="openCheckUpdates()">Подробнее о версии</button></span>
+            </p>
+        </div>
+
+        <div class="settings-grid">
+            <div class="setting-card">
+                <span class="setting-label">Цвет акцента</span>
+                <div class="color-controls">
+                    <input type="color" id="accent-color-input" oninput="changeAccentColor(this.value)">
+                    <div class="color-reset-btn" onclick="resetAccentColor()" title="Сбросить цвет">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="#ff4d4d">
+                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-card">
+                <span class="setting-label">Цвет панелей</span>
+                <div class="color-controls">
+                    <input type="color" id="panel-color-input" oninput="changePanelBgColor(this.value)">
+                    <div class="color-reset-btn" onclick="resetPanelColor()" title="Сбросить цвет">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="#ff4d4d">
+                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-card">
+                <span class="setting-label">Цвет фона</span>
+                <div class="color-controls">
+                    <input type="color" id="bg-color-input" oninput="changeMainBgColor(this.value)">
+                    <div class="color-reset-btn" onclick="resetBgColor()" title="Сбросить цвет">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="#ff4d4d">
+                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-card">
+                <span class="setting-label">Фоновое изображение</span>
+                <div class="bg-controls">
+                    <div class="bg-control-box" id="bg-preview-box" onclick="document.getElementById('bg-input').click()">
+                        <span id="bg-plus-icon">+</span>
+                    </div>
+                    <div class="color-reset-btn" onclick="resetBackground()" title="Сбросить фон">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="#ff4d4d">
+                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-card orientation-card">
+                <span class="setting-label">Ориентация плеера</span>
+                <div class="orientation-controls">
+                    <button class="orientation-btn" id="orientation-vertical" onclick="setPlayerOrientation('vertical')">
+                        <svg viewBox="0 0 24 24" width="24" height="24">
+                            <rect x="4" y="4" width="16" height="16" rx="2" fill="currentColor" opacity="0.3"/>
+                            <rect x="8" y="8" width="8" height="8" rx="1" fill="currentColor"/>
+                        </svg>
+                        <span>Вертикально</span>
+                    </button>
+                    <button class="orientation-btn" id="orientation-horizontal" onclick="setPlayerOrientation('horizontal')">
+                        <svg viewBox="0 0 24 24" width="24" height="24">
+                            <rect x="4" y="7" width="16" height="10" rx="2" fill="currentColor" opacity="0.3"/>
+                            <rect x="7" y="9" width="6" height="6" rx="1" fill="currentColor"/>
+                            <circle cx="17" cy="12" r="2" fill="currentColor"/>
+                        </svg>
+                        <span>Горизонтально</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="setting-card display-mode-card">
+                <span class="setting-label">Отображать под треком</span>
+                <div class="display-mode-controls">
+                    <select id="display-mode-select" class="display-mode-select" onchange="changeDisplayMode(this.value)">
+                        <option value="artist">Только исполнитель</option>
+                        <option value="playlist">Только плейлист/альбом</option>
+                        <option value="both">Исполнитель + плейлист/альбом</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="move-modal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="modal-close-btn" onclick="closeMoveModal()">
+            <svg viewBox="0 0 24 24" width="20" height="20">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/>
+            </svg>
+        </button>
+        <h3>Добавить в плейлист</h3>
+        <div id="modal-playlist-list" class="scrollable" style="max-height:250px; margin: 15px 0;"></div>
+    </div>
+</div>
+
+<div id="CheckUpdates" class="modal-overlay">
+    <div class="modal-content">
+        <button class="modal-close-btn" onclick="closeCheckUpdates()">
+            <svg viewBox="0 0 24 24" width="20" height="20">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/>
+            </svg>
+        </button>
+        <h3>версия 3.6.0</h3>
+        <ul class="update-list">
+            <li>Устранение багов.</li>
+        </ul>
+
+        <h3>версия 3.5.1</h3>
+        <ul class="update-list">
+            <li>Устранение багов.</li>
+            <li>Устранение некорректного отображения интерфейса.</li>
+            <li>Имя исполнителя под названием трека. Возможность быстрого поиска по исполнителю, при нажатии на него.</li>
+        </ul>
+
+        <h3>версия 3.5</h3>
+        <ul class="update-list">
+            <li>Таймер сна с автоотключением.</li>
+            <li>Повтор фрагмента (A-B loop).</li>
+            <li>Обновлен интерфейс.</li>
+            <li>Изменение Ориентации плеера.</li>
+            <li>Больше возможностей кастомизации.</li>
+        </ul>
+    </div>
+</div>
+
+<div id="edit-modal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="modal-close-btn" onclick="closeEditModal()">
+            <svg viewBox="0 0 24 24" width="20" height="20">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/>
+            </svg>
+        </button>
+        <h3 id="edit-modal-title">Изменить</h3>
+        <div id="track-edit-fields" style="display: none;">
+            <input type="text" id="edit-track-name" placeholder="Название трека">
+            <div id="artists-container">
+                <div class="artist-input-wrapper">
+                    <input type="text" id="edit-track-artist-0" class="edit-track-artist" placeholder="Имя исполнителя">
+                    <button class="add-artist-btn" onclick="addArtistField()">
+                        <svg viewBox="0 0 24 24" width="18" height="18">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <input type="text" id="edit-track-album" placeholder="Альбом">
+        </div>
+        <input type="text" id="edit-input" placeholder="Название плейлиста">
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button class="btn-main" onclick="saveEdit()">Готово</button>
+        </div>
+    </div>
+</div>
+
+<div id="confirm-modal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="modal-close-btn" onclick="closeConfirmModal()">
+            <svg viewBox="0 0 24 24" width="20" height="20">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/>
+            </svg>
+        </button>
+        <h3 id="confirm-modal-title">Вы уверены?</h3>
+        <p id="confirm-modal-text" style="color: var(--dim); margin-top: 10px;"></p>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button class="btn-main" id="confirm-modal-btn" style="background: #ff4d4d;">Удалить</button>
+        </div>
+    </div>
+</div>
+
+<div id="sleep-timer-modal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="modal-close-btn" onclick="closeSleepTimerModal()">
+            <svg viewBox="0 0 24 24" width="20" height="20">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/>
+            </svg>
+        </button>
+        <h3>Таймер сна</h3>
+        <p>Выключить через:</p>
+        <div class="timer-options">
+            <button class="timer-option" onclick="setSleepTimer(5)">5 мин</button>
+            <button class="timer-option" onclick="setSleepTimer(15)">15 мин</button>
+            <button class="timer-option" onclick="setSleepTimer(30)">30 мин</button>
+            <button class="timer-option" onclick="setSleepTimer(60)">60 мин</button>
+            <button class="timer-option" onclick="setSleepTimer(120)">2 часа</button>
+            <input type="number" class="timer-option" id="custom-timer-minutes" placeholder="Минуты" min="1" max="300">
+        </div>
+        <div class="sleep-timer-modal-footer">
+            <button class="btn-main" onclick="setCustomSleepTimer()">Установить</button>
+        </div>
+    </div>
+</div>
+
+<div id="playlist-edit-modal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="modal-close-btn" onclick="closePlaylistEditModal()">
+            <svg viewBox="0 0 24 24" width="20" height="20">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/>
+            </svg>
+        </button>
+        <h3>Редактировать плейлист</h3>
+
+        <div class="playlist-edit-cover" onclick="document.getElementById('playlist-cover-input').click()">
+            <img id="playlist-edit-cover-img" src="assets/icons/me-question.png" alt="Обложка плейлиста">
+            <div class="cover-overlay-small">
+                <span>СМЕНИТЬ</span>
+            </div>
+        </div>
+
+        <input type="text" id="playlist-edit-name" placeholder="Название плейлиста" style="margin-top: 20px;">
+
+        <div style="display:flex; gap:10px; margin-top: 30px;">
+            <button class="btn-main" onclick="savePlaylistEdit()">Сохранить</button>
+        </div>
+
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+            <button class="btn-outline" style="color: #ff4d4d; border: none; width: 100%; background-color: transparent" onclick="openDeleteConfirmModal()">
+                <span style="display: flex; align-items: center; justify-content: center; gap: 3px; background-color: #ff4d4d; color: white; padding: 12px; border-radius: 15px;">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="#ff4d4d">
+                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                    </svg>
+                    Удалить плейлист
+                </span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<input type="file" id="audio-input" accept="audio/*" multiple hidden>
+<input type="file" id="cover-input" accept="image/*" hidden onchange="changeTrackCover(this.files[0])">
+<input type="file" id="bg-input" accept="image/*" hidden onchange="changeBackground(this.files[0])">
+<input type="file" id="playlist-cover-input" accept="image/*" hidden onchange="changePlaylistCover(this.files[0])">
+<audio id="audio-core"></audio>
+<script src="scripts/main.js"></script>
+</body>
+</html>
